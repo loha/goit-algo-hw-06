@@ -1,78 +1,49 @@
-import networkx as nx
-import matplotlib.pyplot as plt
+import heapq
 
-# Створення графу
-G = nx.Graph()
+def dijkstra(graph, start):
+    # Ініціалізація
+    n = len(graph)
+    dist = [float('inf')] * n
+    dist[start] = 0
+    prev = [-1] * n
+    pq = [(0, start)]  # (distance, vertex)
+    
+    while pq:
+        current_dist, u = heapq.heappop(pq)
+        
+        # Якщо знайдене значення більше, ніж вже відомий шлях, пропустити
+        if current_dist > dist[u]:
+            continue
+        
+        # Перевірити сусідів
+        for v, weight in graph[u]:
+            distance = current_dist + weight
+            
+            # Якщо знайдений коротший шлях
+            if distance < dist[v]:
+                dist[v] = distance
+                prev[v] = u
+                heapq.heappush(pq, (distance, v))
+    
+    return dist, prev
 
-# Додавання вершин (наприклад, 10 вершин)
-nodes = range(1, 11)
-G.add_nodes_from(nodes)
+# Граф у вигляді списку суміжності
+# graph[u] містить пари (v, weight), де weight - вага ребра між u і v
+graph = {
+    0: [(1, 4), (2, 1)],
+    1: [(2, 2), (3, 5)],
+    2: [(1, 2), (3, 8), (4, 10)],
+    3: [(4, 2)],
+    4: []
+}
 
-# Додавання ребер з вагами (зв'язки між вершинами з вагами)
-edges = [(1, 2, 7), (1, 3, 9), (2, 4, 10), (2, 5, 15), (3, 6, 11), (4, 7, 6),
-         (5, 8, 9), (6, 9, 14), (7, 10, 2), (8, 10, 3), (9, 10, 4)]
-G.add_weighted_edges_from(edges)
+start_vertex = 0
+distances, predecessors = dijkstra(graph, start_vertex)
 
-# Візуалізація графу
-pos = nx.spring_layout(G)  # Лейаут для розміщення графу
-plt.figure(figsize=(10, 8))
-nx.draw(G, pos, with_labels=True, node_color='skyblue', node_size=3000, edge_color='gray')
-labels = nx.get_edge_attributes(G, 'weight')
-nx.draw_networkx_edge_labels(G, pos, edge_labels=labels)
-plt.title('Інтернет-топологія з вагами')
-plt.show()
+print("Відстані від початкової вершини:")
+for i, dist in enumerate(distances):
+    print(f"До вершини {i}: {dist}")
 
-def dijkstra_shortest_paths(graph, start):
-    # Використовуємо вбудовану функцію алгоритму Дейкстри з бібліотеки NetworkX
-    length, path = nx.single_source_dijkstra(graph, start)
-    return length, path
-
-# Вибір початкової вершини для знаходження найкоротших шляхів до всіх інших вершин
-start_node = 1
-
-# Виконання алгоритму Дейкстри
-lengths, paths = dijkstra_shortest_paths(G, start_node)
-
-# Виведення результатів
-print(f"Найкоротші шляхи від вершини {start_node} до всіх інших вершин:")
-for target_node in paths:
-    print(f"До вершини {target_node}: шлях {paths[target_node]}, довжина {lengths[target_node]}")
-
-# Створення графу
-G = nx.Graph()
-
-# Додавання вершин (наприклад, 10 вершин)
-nodes = range(1, 11)
-G.add_nodes_from(nodes)
-
-# Додавання ребер з вагами (зв'язки між вершинами з вагами)
-edges = [(1, 2, 7), (1, 3, 9), (2, 4, 10), (2, 5, 15), (3, 6, 11), (4, 7, 6),
-         (5, 8, 9), (6, 9, 14), (7, 10, 2), (8, 10, 3), (9, 10, 4)]
-G.add_weighted_edges_from(edges)
-
-# Візуалізація графу
-pos = nx.spring_layout(G)  # Лейаут для розміщення графу
-plt.figure(figsize=(10, 8))
-nx.draw(G, pos, with_labels=True, node_color='skyblue', node_size=3000, edge_color='gray')
-labels = nx.get_edge_attributes(G, 'weight')
-nx.draw_networkx_edge_labels(G, pos, edge_labels=labels)
-plt.title('Інтернет-топологія з вагами')
-plt.show()
-
-# Реалізація алгоритму Дейкстри
-def dijkstra_shortest_paths(graph, start):
-    # Використовуємо вбудовану функцію алгоритму Дейкстри з бібліотеки NetworkX
-    length, path = nx.single_source_dijkstra(graph, start)
-    return length, path
-
-# Вибір початкової вершини для знаходження найкоротших шляхів до всіх інших вершин
-start_node = 1
-
-# Виконання алгоритму Дейкстри
-lengths, paths = dijkstra_shortest_paths(G, start_node)
-
-# Виведення результатів
-print(f"Найкоротші шляхи від вершини {start_node} до всіх інших вершин:")
-for target_node in paths:
-    print(f"До вершини {target_node}: шлях {paths[target_node]}, довжина {lengths[target_node]}")
-
+print("\nПопередники у найкоротшому шляху:")
+for i, prev in enumerate(predecessors):
+    print(f"Вершина {i} попередник: {prev}")
